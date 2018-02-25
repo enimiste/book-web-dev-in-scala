@@ -13,10 +13,6 @@ import services.{SunService, WeatherService}
 import scala.concurrent.ExecutionContext.Implicits.global
 import akka.pattern.ask
 import akka.util.Timeout
-import play.api.Logger
-
-import scala.concurrent.Future
-
 
 class Application @Inject()(components: ControllerComponents, ws: WSClient,
                             sunService: SunService, weatherService: WeatherService,
