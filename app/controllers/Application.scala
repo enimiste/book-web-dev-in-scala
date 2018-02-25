@@ -13,12 +13,17 @@ import services.{SunService, WeatherService}
 import scala.concurrent.ExecutionContext.Implicits.global
 import akka.pattern.ask
 import akka.util.Timeout
+import model.CombinedData
+import play.api.libs.json.Json
 
 class Application @Inject()(components: ControllerComponents, ws: WSClient,
                             sunService: SunService, weatherService: WeatherService,
                             actorSystem: ActorSystem)
   extends AbstractController(components) {
-  def index: Action[AnyContent] = Action.async { request =>
+  def index: Action[AnyContent] = Action {
+    Ok(views.html.index())
+  }
+  def data: Action[AnyContent] = Action.async { request =>
     /*
       Region: Rabat-Sale
       Country: Morocco
@@ -36,7 +41,7 @@ class Application @Inject()(components: ControllerComponents, ws: WSClient,
     val lat = request.getQueryString("lat").map(_.toDouble).getOrElse(34.0252778)
     val lng = request.getQueryString("lng").map(_.toDouble).getOrElse(-6.8361111)
 
-    implicit val timeout: Timeout = Timeout(10, TimeUnit.SECONDS)
+    implicit val timeout: Timeout = Timeout(5, TimeUnit.SECONDS)
     val actor = actorSystem.actorSelection(StatsActor.path)
     val countF = (actor ? GetStats).mapTo[Int]
 
@@ -47,7 +52,7 @@ class Application @Inject()(components: ControllerComponents, ws: WSClient,
       wt <- eventualTupleF
       count <- countF
     } yield {
-      Ok(views.html.index(sinf.copy(city = wt._1), wt._2, count))
+      Ok(Json.toJson(CombinedData(sinf.copy(city = wt._1), wt._2, count)))
     }
   }
 }

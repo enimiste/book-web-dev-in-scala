@@ -1,3 +1,4 @@
 GET     /                           controllers.Application.index
+GET     /api/data                   controllers.Application.data
 
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
