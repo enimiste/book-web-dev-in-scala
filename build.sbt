@@ -9,5 +9,11 @@ libraryDependencies ++= Seq(
   jdbc,
   ehcache,
   ws,
-  "com.softwaremill.macwire" %% "macros" % "2.3.0" % "provided"
+  evolutions,
+  "com.softwaremill.macwire" %% "macros" % "2.3.0" % "provided",
+  "org.postgresql" % "postgresql" % "42.1.1",
+  "org.scalikejdbc" %% "scalikejdbc" % "3.0.0",
+  "org.scalikejdbc" %% "scalikejdbc-config" % "3.0.0",
+  "ch.qos.logback" % "logback-classic" % "1.2.3",
+  "de.svenkubiak" % "jBCrypt" % "0.4.1"
 )
