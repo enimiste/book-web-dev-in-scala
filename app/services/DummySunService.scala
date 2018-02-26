@@ -1,6 +1,6 @@
 package services
 
-import model.SunInfo
+import models.SunInfo
 import services.contracts.SunService
 
 import scala.concurrent.Future

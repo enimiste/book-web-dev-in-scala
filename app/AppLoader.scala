@@ -1,3 +1,4 @@
+import actions.{UserAuthAction, UserAuthOptAction}
 import actors.StatsActor
 import actors.StatsActor.Ping
 import akka.actor.{ActorRef, Props}
@@ -6,8 +7,9 @@ import controllers.{Application, AssetsComponents}
 import filters.StatsFilter
 import play.api
 import play.api.ApplicationLoader.Context
-import play.api.db.{DBComponents, HikariCPComponents}
+import play.api.cache.ehcache.EhCacheComponents
 import play.api.db.evolutions.EvolutionsComponents
+import play.api.db.{DBComponents, HikariCPComponents}
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.{ControllerComponents, DefaultControllerComponents, EssentialFilter}
 import play.api.routing.Router
@@ -15,8 +17,8 @@ import play.api.{ApplicationLoader, BuiltInComponentsFromContext, Logger, Logger
 import play.filters.HttpFiltersComponents
 import router.Routes
 import scalikejdbc.config.DBs
-import services.contracts.{SunService, WeatherService}
-import services.{DummySunService, SunriseSunSetService, OpenWeatherApiService}
+import services.contracts.{AuthService, SunService, WeatherService}
+import services.{DbAuthService, OpenWeatherApiService, SunriseSunSetService}
 
 import scala.concurrent.Future
 
@@ -33,7 +35,8 @@ class AppApplicationLoader extends ApplicationLoader {
 class AppComponents(context: Context) extends BuiltInComponentsFromContext(context)
   with AhcWSComponents with AssetsComponents
   with HttpFiltersComponents with EvolutionsComponents
-  with DBComponents with HikariCPComponents{
+  with DBComponents with HikariCPComponents
+  with EhCacheComponents {
   override lazy val controllerComponents: ControllerComponents = wire[DefaultControllerComponents]
 
   override def router: Router = wire[Routes]
@@ -48,6 +51,11 @@ class AppComponents(context: Context) extends BuiltInComponentsFromContext(conte
   override lazy val httpFilters: Seq[EssentialFilter] = Seq(statsFilter)
 
   lazy val statsActor: ActorRef = actorSystem.actorOf(Props(wire[StatsActor]), StatsActor.name)
+
+  lazy val authService: AuthService = new DbAuthService(defaultCacheApi.sync)
+
+  lazy val userAuthAction: UserAuthAction = wire[UserAuthAction]
+  lazy val userAuthOptAction: UserAuthOptAction = wire[UserAuthOptAction]
 
   val onStart: Unit = {
     Logger.info("The app is about to start")

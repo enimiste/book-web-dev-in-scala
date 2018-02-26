@@ -1,4 +1,4 @@
-@()
+@(errorOpt: Option[String] = None)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +13,9 @@
     <form action="/login" method="post">
         <fieldset>
             <legend>Login</legend>
+            @errorOpt.map {error =>
+                <span class="tag-box -error">@error</span>
+            }
             <p>
                 <label for="username">Username :</label>
                 <input type="text" name="username" id="username"/>
@@ -24,5 +27,6 @@
             <button type="submit" class="button--sm">Login</button>
         </fieldset>
     </form>
+    <a href="/">Home</a>
 </body>
 </html>

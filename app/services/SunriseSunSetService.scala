@@ -3,7 +3,7 @@ package services
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneId, ZonedDateTime}
 
-import model.SunInfo
+import models.SunInfo
 import play.api.libs.ws.WSClient
 import services.contracts.SunService
 

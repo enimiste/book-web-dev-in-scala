@@ -3,27 +3,49 @@ package controllers
 import java.util.concurrent.TimeUnit
 import javax.inject._
 
+import actions.{UserAuthAction, UserAuthOptAction}
 import actors.StatsActor
 import actors.StatsActor.GetStats
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.util.Timeout
-import model.CombinedData
+import forms.UserLoginData
+import models.CombinedData
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
-import services.OpenWeatherApiService
-import services.contracts.{SunService, WeatherService}
+import services.contracts.{AuthService, SunService, WeatherService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class Application @Inject()(components: ControllerComponents, ws: WSClient,
                             sunService: SunService,
                             weatherService: WeatherService,
+                            authService: AuthService,
+                            userAuthAction: UserAuthAction,
+                            userAuthOptAction: UserAuthOptAction,
                             actorSystem: ActorSystem)
   extends AbstractController(components) {
-  def index: Action[AnyContent] = Action {
-    Ok(views.html.index())
+  val userLoginDataForm = Form {
+    mapping(
+      "username" -> nonEmptyText,
+      "password" -> nonEmptyText
+    )(UserLoginData.apply)(UserLoginData.unapply)
+  }
+
+  def index: Action[AnyContent] = userAuthOptAction { request =>
+    Ok(views.html.index(request.user))
+  }
+
+  def profile: Action[AnyContent] = userAuthAction { request =>
+    Ok(views.html.profile(request.user))
+  }
+
+  def logout: Action[AnyContent] = userAuthAction { request =>
+    val cookie = authService.logout(request)
+    Redirect("/login").withCookies(cookie)
   }
 
   def data: Action[AnyContent] = Action.async { request =>
@@ -59,7 +81,18 @@ class Application @Inject()(components: ControllerComponents, ws: WSClient,
     }
   }
 
-  def login: Action[AnyContent] = Action {
+  def loginForm: Action[AnyContent] = Action {
     Ok(views.html.login())
+  }
+
+  def login: Action[AnyContent] = Action { implicit request =>
+    userLoginDataForm.bindFromRequest().fold(
+      _ => Ok(views.html.login(Some("Wrong data"))),
+      userLoginData => {
+        authService.login(userLoginData.username, userLoginData.password) match {
+          case Some(cookie) => Redirect("/").withCookies(cookie)
+          case None => Ok(views.html.login(Some("Login Failed")))
+        }
+      })
   }
 }

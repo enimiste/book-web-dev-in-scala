@@ -1,4 +1,4 @@
-@(userOpt: Option[models.User])
+@(user: models.User)
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -10,13 +10,15 @@
         href='@routes.Assets.versioned("images/favicon.png")'>
     </head>
     <body>
-        <h1>Hello Play</h1>
-        <div id="app"></div>
+        <h1>[Restricted area] Profile</h1>
+        <ul>
+            <li>Id : @user.userId</li>
+            <li>Code : @user.userCode</li>
+            <li>Password : @user.password</li>
+        </ul>
         <hr/>
-        @userOpt.map{user =>
-            <a href="/profile">Your profile</a><br/>
-            <a href="/logout">Logout</a>
-        }
+        <a href="/">Home</a><br/>
+        <a href="/logout">Logout</a>
         <script src='@routes.Assets.versioned("compiled/bundle.js")' ></script>
     </body>
 </html>
