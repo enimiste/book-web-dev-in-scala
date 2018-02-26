@@ -1,7 +1,6 @@
 const webpack = require("webpack")
 const path = require('path')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const dev = process.env.NODE_ENV === 'development';
 
 module.exports = {
     entry: './ui/entry.js',
@@ -18,11 +17,14 @@ module.exports = {
             },
             {
                 test: /\.scss?$/,
-                use:  ['style-loader', 'css-loader', 'sass-loader']
+                use:  ExtractTextPlugin.extract({
+                        fallback: "style-loader",
+                        use: ['css-loader', 'sass-loader']
+                      })
             },
         ],
     },
     plugins: [
-    ],
-    mode: dev ? 'development' : 'production'
+     new ExtractTextPlugin("styles.css"),
+    ]
 }

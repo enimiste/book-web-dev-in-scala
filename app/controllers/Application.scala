@@ -55,4 +55,8 @@ class Application @Inject()(components: ControllerComponents, ws: WSClient,
       Ok(Json.toJson(CombinedData(sinf.copy(city = wt._1), wt._2, count)))
     }
   }
+
+  def login: Action[AnyContent] = Action{
+    Ok(views.html.login())
+  }
 }
