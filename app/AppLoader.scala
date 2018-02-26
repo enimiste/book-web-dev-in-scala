@@ -15,7 +15,8 @@ import play.api.{ApplicationLoader, BuiltInComponentsFromContext, Logger, Logger
 import play.filters.HttpFiltersComponents
 import router.Routes
 import scalikejdbc.config.DBs
-import services.{SunService, WeatherService}
+import services.contracts.{SunService, WeatherService}
+import services.{DummySunService, SunriseSunSetService, OpenWeatherApiService}
 
 import scala.concurrent.Future
 
@@ -40,8 +41,8 @@ class AppComponents(context: Context) extends BuiltInComponentsFromContext(conte
   lazy val prefix: String = "/"
   lazy val applicationController: Application = wire[Application]
 
-  lazy val sunService: SunService = wire[SunService]
-  lazy val weatherService: WeatherService = wire[WeatherService]
+  lazy val sunService: SunService = wire[SunriseSunSetService]
+  lazy val weatherService: WeatherService = new OpenWeatherApiService(wsClient, "30b9a4541627b5cd44f33c64b89fa5e2")
 
   lazy val statsFilter: StatsFilter = wire[StatsFilter]
   override lazy val httpFilters: Seq[EssentialFilter] = Seq(statsFilter)

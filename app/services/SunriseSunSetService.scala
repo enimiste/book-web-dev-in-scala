@@ -5,11 +5,12 @@ import java.time.{ZoneId, ZonedDateTime}
 
 import model.SunInfo
 import play.api.libs.ws.WSClient
+import services.contracts.SunService
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SunService(ws: WSClient) {
+class SunriseSunSetService(ws: WSClient) extends SunService{
   def getSunInfo(lat: Double, lng: Double): Future[SunInfo] = {
     val sunRespF = ws.url(s"http://api.sunrise-sunset.org/json?lat=$lat&lng=$lng&formatted=0").get()
     for {

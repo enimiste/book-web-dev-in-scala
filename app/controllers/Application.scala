@@ -6,23 +6,26 @@ import javax.inject._
 import actors.StatsActor
 import actors.StatsActor.GetStats
 import akka.actor.ActorSystem
-import play.api.libs.ws.WSClient
-import play.api.mvc._
-import services.{SunService, WeatherService}
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import akka.pattern.ask
 import akka.util.Timeout
 import model.CombinedData
 import play.api.libs.json.Json
+import play.api.libs.ws.WSClient
+import play.api.mvc._
+import services.OpenWeatherApiService
+import services.contracts.{SunService, WeatherService}
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class Application @Inject()(components: ControllerComponents, ws: WSClient,
-                            sunService: SunService, weatherService: WeatherService,
+                            sunService: SunService,
+                            weatherService: WeatherService,
                             actorSystem: ActorSystem)
   extends AbstractController(components) {
   def index: Action[AnyContent] = Action {
     Ok(views.html.index())
   }
+
   def data: Action[AnyContent] = Action.async { request =>
     /*
       Region: Rabat-Sale
@@ -52,11 +55,11 @@ class Application @Inject()(components: ControllerComponents, ws: WSClient,
       wt <- eventualTupleF
       count <- countF
     } yield {
-      Ok(Json.toJson(CombinedData(sinf.copy(city = wt._1), wt._2, count)))
+      Ok(Json.toJson(CombinedData(if (sinf.city.nonEmpty) sinf else sinf.copy(city = Some(wt._1)), wt._2, count)))
     }
   }
 
-  def login: Action[AnyContent] = Action{
+  def login: Action[AnyContent] = Action {
     Ok(views.html.login())
   }
 }
