@@ -16,6 +16,8 @@
         @userOpt.map{user =>
             <a href="/profile">Your profile</a><br/>
             <a href="/logout">Logout</a>
+        }.getOrElse{
+            <a href="/login">Login</a>
         }
         <script src='@routes.Assets.versioned("compiled/bundle.js")' ></script>
     </body>
